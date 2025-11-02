@@ -1,16 +1,19 @@
 # config/params.yaml
-data:
-  image_size: 512
-  text_max_length: 512
-  validation_split: 0.2
-  test_split: 0.1
-  batch_size: 16
+preprocessing:
+  max_length: 512
+  training_ratio: 0.2
+  batch_size: 32
 
-training:
-  epochs: 50
-  learning_rate: 0.001
-  early_stopping_patience: 10
-  reduce_lr_patience: 5
+TrainingArguments:
+  num_labels: 6
+  num_train_epochs: 3
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  learning_rate: 1e-4
+  eval_strategy: "epoch"
+  save_strategy: "epoch"
+  load_best_model_at_end: True
+  remove_unused_columns: False
 
 model:
   vision_encoder: "efficientnet_b3"
