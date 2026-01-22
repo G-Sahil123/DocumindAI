@@ -2,7 +2,7 @@ artifacts_root: artifacts_root
 
 data_ingestion:
   root_dir: artifacts/data_ingestion
-  source_URL: https://drive.google.com/drive/folders/16ffMba3iRZ7ipzA-jcNw38dTruOrLt__?usp=sharing
+  source_URL: https://huggingface.co/datasets/AnsariSahil/OCR_datset
   local_data_file: artifacts/data_ingestion/data.zip
   unzip_dir: artifacts/data_ingestion
 

@@ -1,0 +1,35 @@
+# config/config.yaml
+app:
+  name: "DocuMind AI"
+  version: "1.0.0"
+  description: "Multimodal Document Intelligence System"
+
+backend:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true
+  workers: 1
+
+database:
+  url: "sqlite:///./documind.db"
+  echo: false
+
+model:
+  vision_encoder: "efficientnet_b3"
+  text_encoder: "bert-base-uncased"
+  fusion_hidden_size: 512
+
+processing:
+  image:
+    width: 512
+    height: 512
+    normalize: true
+  text:
+    max_length: 512
+    truncation: true
+    padding: true
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/documind.log"

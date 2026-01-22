@@ -1,5 +1,5 @@
 import os
-import urllib.request as request
+from huggingface_hub import snapshot_download
 import zipfile
 from src.DocumindAI.logging import logger
 from src.DocumindAI.utils.common import get_size
@@ -11,26 +11,39 @@ class DataIngestion:
         self.config = config
 
 
-    
     def download_file(self):
-        if not os.path.exists(self.config.local_data_file):
-            filename, headers = request.urlretrieve(
-                url = self.config.source_URL,
-                filename = self.config.local_data_file
-            )
-            logger.info(f"{filename} download! with following info: \n{headers}")
-        else:
-            logger.info(f"File already exists of size: {get_size(Path(self.config.local_data_file))}")  
+        """
+        Downloads the dataset from Hugging Face Hub using snapshot_download().
+        If the dataset already exists locally, it skips downloading.
+        """
+        dataset_dir = Path(self.config.root_dir)
+        os.makedirs(dataset_dir, exist_ok=True)
 
-        
-    
+        if not os.path.exists(self.config.unzip_dir) or len(os.listdir(self.config.unzip_dir)) == 0:
+            logger.info(f"Downloading dataset from Hugging Face: {self.config.source_URL}")
+            repo_id = self.config.source_URL.replace("https://huggingface.co/datasets/", "").strip("/")
+
+            local_path = snapshot_download(
+                repo_id=repo_id,
+                repo_type="dataset",
+                local_dir=dataset_dir,
+                token=os.getenv("HF_TOKEN", None) 
+            )
+
+            logger.info(f"Dataset downloaded at: {local_path}")
+        else:
+            logger.info(f"Dataset already exists at {self.config.unzip_dir} (Size: {get_size(Path(self.config.unzip_dir))})")
+
+
     def extract_zip_file(self):
-        """
-        zip_file_path: str
-        Extracts the zip file into the data directory
-        Function returns None
-        """
         unzip_path = self.config.unzip_dir
         os.makedirs(unzip_path, exist_ok=True)
-        with zipfile.ZipFile(self.config.local_data_file, 'r') as zip_ref:
-            zip_ref.extractall(unzip_path)
+
+        for file in os.listdir(self.config.root_dir):
+            if file.endswith(".zip"):
+                zip_path = os.path.join(self.config.root_dir, file)
+                logger.info(f"Extracting {zip_path} to {unzip_path}")
+                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(unzip_path)
+
+        logger.info("Extraction complete!")
