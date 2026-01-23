@@ -15,13 +15,13 @@ data_validation:
 data_preprocessing:
   root_dir: artifacts/data_preprocessing
   data_path: artifacts/data_ingestion/dataset_new
-  model: microsoft/layoutlmv2-base-uncased
+  model: microsoft/layoutlmv3-base
 
 
 model_trainer:
   root_dir: artifacts/model_trainer
   data_path: artifacts/data_preprocessing/encoded_data
-  model: microsoft/layoutlmv2-base-uncased
+  model: microsoft/layoutlmv3-base
 
 model_evaluation:
   root_dir: artifacts/model_evaluation
