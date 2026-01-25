@@ -79,12 +79,11 @@ class ModelTrainer:
         print("Training completed!")
 
     def save_model(self):
-        save_path = self.config.root_dir
-        os.makedirs(save_path, exist_ok=True)
+        model_dir = os.path.join(self.config.root_dir,"documind_model")
+        os.makedirs(model_dir, exist_ok=True)
 
-        print(f"Saving model to: {save_path}")
-        self.trainer.save_model(save_path)
-
+        print(f"Saving model to: {model_dir}")
+        self.trainer.save_model(model_dir)
         print("Model and trainer saved successfully!")
 
     def train(self):

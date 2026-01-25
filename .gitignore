@@ -2,3 +2,4 @@ projectenv/
 artifacts/
 OCR_datset/
 claude/
+.env
