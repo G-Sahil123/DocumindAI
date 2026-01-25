@@ -56,7 +56,7 @@ class ConfigurationManager:
             data_path=config.data_path,
             model = config.model,
             max_length = params.max_length,
-            training_ratio = params.training_ratio
+            training_ratio = params.training_ratio,
             batch_size = params.batch_size
         )
 
@@ -72,15 +72,19 @@ class ConfigurationManager:
             root_dir=config.root_dir,
             data_path=config.data_path,
             model = config.model,
-            num_labels: params.num_labels,
-            num_train_epochs: params.num_train_epochs,
-            per_device_train_batch_size: params.per_device_train_batch_size,
-            per_device_eval_batch_size: params.per_device_eval_batch_size,
-            learning_rate: params.learning_rate,
-            eval_strategy: params.eval_strategy,
-            save_strategy: params.save_strategy,
-            load_best_model_at_end: params.load_best_model_at_end,
-            remove_unused_columns: params.remove_unused_columns
+            num_labels = params.num_labels,
+            num_train_epochs = params.num_train_epochs,
+            per_device_train_batch_size = params.per_device_train_batch_size,
+            per_device_eval_batch_size = params.per_device_eval_batch_size,
+            learning_rate = params.learning_rate,
+            eval_strategy = params.eval_strategy,
+            save_strategy = params.save_strategy,
+            load_best_model_at_end = params.load_best_model_at_end,
+            remove_unused_columns = params.remove_unused_columns,
+            gradient_accumulation_steps = params.gradient_accumulation_steps,
+            weight_decay = params.weight_decay,
+            optim = params.optim,
+            number_of_unfreeze_layers = params.number_of_unfreeze_layers
         )
 
-        return model_trainer_config        
+        return model_trainer_config       

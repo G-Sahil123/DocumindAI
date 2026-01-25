@@ -32,8 +32,12 @@ class ModelTrainerConfig:
     num_train_epochs: int
     per_device_train_batch_size: int
     per_device_eval_batch_size: int
+    gradient_accumulation_steps: int
+    weight_decay: float
     learning_rate: float
     eval_strategy: str
     save_strategy: str
     load_best_model_at_end: bool
-    remove_unused_columns: bool    
+    remove_unused_columns: bool
+    optim: str
+    number_of_unfreeze_layers : int    

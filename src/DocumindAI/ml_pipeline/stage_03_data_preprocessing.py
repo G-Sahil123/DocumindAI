@@ -2,7 +2,7 @@ from src.DocumindAI.config.configuration import ConfigurationManager
 from src.DocumindAI.components.data_preprocessing import DataPreprocessing
 
 
-class DataTransformationTrainingPipeline:
+class DataPreprocessingTrainingPipeline:
     def __init__(self):
         pass
 

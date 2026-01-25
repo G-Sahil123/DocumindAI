@@ -5,16 +5,18 @@ import torch
 from datasets import load_from_disk
 from src.DocumindAI.logging import logger
 from src.DocumindAI.entity import DataPreprocessingConfig
+from PIL import Image
 
 class DataPreprocessing:
     def __init__(self, config: DataPreprocessingConfig):
         self.config = config
-        self.preprocessor = AutoProcessor.from_pretrained(config.model,apply_ocr=True)
+        self.preprocessor = AutoProcessor.from_pretrained(self.config.model,apply_ocr=True)
 
         self.raw_dataset = {}
         self.encoded_dataset = {}
-        self.label_to_int = {}
-        self.num_labels =0
+        self.label2id = {}
+        self.id2label = {}
+        self.num_labels = 0
 
     def create_dataframe_for_split(self,split_name):
         print(f"Gathering file paths for the {split_name} split...")
@@ -51,23 +53,24 @@ class DataPreprocessing:
         print("\n✅ Raw datasets loaded and shuffled.")  
 
     def encode_labels(self):
-        label_list = sorted(list(set(self.raw_dataset['train']['label'])))
-        self.label_to_int = {label: i for i, label in enumerate(label_list)}
+        label_list = sorted(list(set(self.raw_dataset['test']['label'])))
+        self.label2id = {label: i for i, label in enumerate(label_list)}
         self.num_labels = len(label_list)
+        self.id2label = {i:label for label,i in self.label2id.items()}
         print(f"\nDetected Labels ({self.num_labels}): {label_list}")
 
-        def map_label_to_int(examples):
-            examples['labels'] = [self.label_to_int[label] for label in examples['label']]
+        def map_label_to_id(examples):
+            examples['labels'] = [self.label2id[label] for label in examples['label']]
             return examples
 
         self.raw_dataset = {
-            split: self.raw_dataset[split].map(map_label_to_int, batched=True)
+            split: self.raw_dataset[split].map(map_label_to_id, batched=True)
             for split in self.raw_dataset
         }
 
     def preprocess_data(self, examples):
         images = [Image.open(path).convert("RGB") for path in examples['image_path']]
-        encoding = self.processor(
+        encoding = self.preprocessor(
             images=images,
             padding="max_length",
             truncation=True,
@@ -104,10 +107,7 @@ class DataPreprocessing:
         print("\nSaving raw datasets...")
         for split_name, ds in self.raw_dataset.items():
             ds.save_to_disk(f"{save_raw_path}/{split_name}")
-        print("✅ Raw dataset saved successfully!")
-
-        self.processor.save_pretrained(os.path.join(save_encoded_path, "processor"))
-        print("✅ Processor configuration saved.")     
+        print("✅ Raw dataset saved successfully!")   
 
     def preprocess(self):
         self.load_raw_dataset()
