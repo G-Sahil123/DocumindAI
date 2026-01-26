@@ -6,6 +6,7 @@ from datasets import load_from_disk
 from src.DocumindAI.logging import logger
 from src.DocumindAI.entity import DataPreprocessingConfig
 from PIL import Image
+import json
 
 class DataPreprocessing:
     def __init__(self, config: DataPreprocessingConfig):
@@ -57,6 +58,9 @@ class DataPreprocessing:
         self.label2id = {label: i for i, label in enumerate(label_list)}
         self.num_labels = len(label_list)
         self.id2label = {i:label for label,i in self.label2id.items()}
+        with open(os.path.join("config","id2label.json"), "w") as f:
+            json.dump(self.id2label, f, indent=4)
+
         print(f"\nDetected Labels ({self.num_labels}): {label_list}")
 
         def map_label_to_id(examples):
