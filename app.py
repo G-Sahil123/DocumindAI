@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request ,UploadFile, File, HTTPException, Form, Depends
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordBearer
@@ -27,7 +27,7 @@ app = FastAPI(title ="DocumindAI",version="1.0")
 # Jinja2 template loader
 templates = Jinja2Templates(directory="frontend/templates")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def get_db_connection():
     return mysql.connector.connect(
@@ -36,6 +36,12 @@ def get_db_connection():
         password=os.getenv("DB_PASSWORD"),
         database=os.getenv("DB_NAME"),
     )
+
+def get_current_user_optional(request: Request):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return None
+    return int(user_id)
 
 def get_current_user(request: Request)->int:
     user_id = request.cookies.get("user_id")
@@ -46,7 +52,7 @@ def get_current_user(request: Request)->int:
 class RegisterUser(BaseModel):
     full_name: str
     email: EmailStr
-    password: str = Field(..., min_length=8)
+    password: str = Field(..., min_length=8,max_length=64)
 
     @field_validator("password")
     def strong_password(cls, v):
@@ -57,7 +63,8 @@ class RegisterUser(BaseModel):
 # Serve UI at root "/"
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("home.html", {"request": request})
+    user = get_current_user_optional(request)
+    return templates.TemplateResponse("home.html", {"request": request,"user": user})
 
 @app.get("/register", response_class=HTMLResponse)
 async def register_form(request: Request):
@@ -95,7 +102,7 @@ async def register(
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_form(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse("login.html", {"request": request,"user":None})
 
 
 @app.post("/login")
@@ -116,27 +123,35 @@ async def login(
         raise HTTPException(401, "Invalid credentials")
 
     response = RedirectResponse("/predict", status_code=302)
-    response.set_cookie("user_id", str(user["user_id"]), httponly=True)
+    response.set_cookie("user_id", str(user["user_id"]), httponly=True,path="/")
     return response
 
 # Training route
 @app.get("/train-ui", response_class=HTMLResponse)
 async def train(request: Request,user_id: int = Depends(get_current_user)):
-    return templates.TemplateResponse("train.html", {"request": request})
+    return templates.TemplateResponse("train.html", {"request": request,"user":user_id})
 
 @app.post("/train")
-async def training(user_id: int = Depends(get_current_user)):
+async def training(request:Request,user_id: int = Depends(get_current_user)):
     try:
         os.system("python main.py")
         # os.system("dvc repro")
-        return {"message": "Training successful !!"}
+        return templates.TemplateResponse(
+            "train.html",
+            {
+            "request": request,
+            "user": user_id,
+            "message": "Training completed successfully ✅"
+            }
+        )
+
     except Exception as e:
         raise HTTPException(500, str(e))
 
 # Prediction route
 @app.get("/predict", response_class=HTMLResponse)
 async def predict_form(request: Request,user_id: int = Depends(get_current_user)):
-    return templates.TemplateResponse("predict.html", {"request": request})
+    return templates.TemplateResponse("predict.html", {"request": request,"user": user_id})
 
 @app.post("/predict")
 async def predict(file:UploadFile=File(...),user_id: int=Depends(get_current_user)):
@@ -155,10 +170,10 @@ async def predict(file:UploadFile=File(...),user_id: int=Depends(get_current_use
 
     try:
         pipeline = PredictionPipeline(file_path)
-        prediction, metadata = pipeline.predict()
-        return {"document_type": prediction}
-    except Exception:
-            raise HTTPException(500, "Prediction failed")
+        prediction, confidence = pipeline.predict()
+        return JSONResponse(content={"label": prediction, "confidence": confidence})
+    except Exception as e:
+        raise HTTPException(500, f"Prediction failed: {str(e)}")
     finally:
         if file_path.exists():
             file_path.unlink()
@@ -171,4 +186,4 @@ async def logout():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8010)

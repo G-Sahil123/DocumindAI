@@ -1,0 +1,8 @@
+{
+    "0" : "email",
+    "1" : "form",
+    "2" : "invoice",
+    "3" : "letter",
+    "4" : "news_article",
+    "5" : "resume"
+}

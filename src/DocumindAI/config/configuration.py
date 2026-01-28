@@ -1,6 +1,6 @@
 from src.DocumindAI.constants import *
 from src.DocumindAI.utils.common import read_yaml,create_directories
-from src.DocumindAI.entity import (DataIngestionConfig,
+from src.DocumindAI.entity.config_entity import (DataIngestionConfig,
                                    DataValidationConfig,
                                    DataPreprocessingConfig,
                                    ModelTrainerConfig,

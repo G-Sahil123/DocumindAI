@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Document Classification | DocuMind AI{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card p-4">
+                <h3 class="text-center mb-4">
+                    <i class="bi bi-image"></i> Document Classification
+                </h3>
+
+                <form action="/predict" method="post" enctype="multipart/form-data">
+                    
+                    <!-- File input -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            Upload Document Image
+                        </label>
+                        <input 
+                            type="file" 
+                            class="form-control"
+                            name="file"
+                            accept=".png,.jpg,.jpeg,.tif,.tiff"
+                            required
+                        >
+                        <div class="form-text">
+                            Supported formats:
+                            <ul class="mb-0">
+                                <li>PNG</li>
+                                <li>JPG / JPEG</li>
+                                <li>TIFF/TIF</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Submit button -->
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cpu"></i> Classify Document
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Optional result display -->
+                {% if label %}
+                <div class="alert alert-success mt-4 text-center">
+                    <strong>Predicted Document Type:</strong><br>
+                    <span class="fs-5">{{ label }}</span>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

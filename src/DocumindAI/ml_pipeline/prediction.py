@@ -3,20 +3,20 @@ from transformers import LayoutLMv3ForSequenceClassification, AutoProcessor
 from PIL import Image
 import os
 import json
+from src.DocumindAI.config.configuration import ConfigurationManager
 
 
 
 class PredictionPipeline:
     def __init__(self,filename):
         self.filename =filename
+        self.config = ConfigurationManager().get_evaluation_config()
 
 
     
     def predict(self):
-        model_path = os.path.join("arifacts", "model_trainer","documind_model")
-
-        processor = AutoProcessor.from_pretrained(model_path)
-        model = LayoutLMv3ForSequenceClassification.from_pretrained(model_path)
+        processor = AutoProcessor.from_pretrained(self.config.model_path)
+        model = LayoutLMv3ForSequenceClassification.from_pretrained(self.config.model_path)
         model.eval()
 
         image = Image.open(self.filename).convert("RGB")
